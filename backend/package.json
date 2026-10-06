@@ -1,0 +1,24 @@
+{
+  "name": "site-freelancer",
+  "version": "1.0.0",
+  "description": "Repositorio para o site",
+  "main": "index.js",
+  "scripts": {
+    
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trabalho-Freelancer-Compsoc/Site-Freelancer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Trabalho-Freelancer-Compsoc/Site-Freelancer/issues"
+  },
+  "homepage": "https://github.com/Trabalho-Freelancer-Compsoc/Site-Freelancer#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2"
+  }
+}
