@@ -1,22 +1,78 @@
-*{
-    background-color: rgb(196, 196, 196);
+
+body{
+    background-color: rgb(221, 228, 221);
+    margin: 0;
+    padding: 0;
 }
 
+input{
+    background-color: transparent;
+}
+
+span{
+    background-color: transparent;
+    color: black;
+    text-shadow: none;
+}
+
+.posts{
+    box-sizing: border-box;
+    padding: 20px;
+    margin-left: 7rem;
+    top: 1px;
+    
+    background: white;
+    border:none;
+    border-radius: 1rem;
+    
+    width: 35rem;
+    height: auto;
+    
+    text-align:start;
+}
+
+.postados{
+    padding: 20px;
+    margin-left: 800px;
+    margin-top: 1rem;
+    flex-direction: column-reverse;
+    
+    background: white;
+    border:none;
+    border-radius: 1rem;
+
+    min-width: 30rem;
+    min-height: 10rem;
+
+    text-align:justify;
+    text-align:start;   
+
+}
 
 #postarea{
     display:flex;
-    
+    width: 50%;
+    margin-bottom: auto;
+    flex-direction: column-reverse;
 }
-p{
-    background-color: transparent;
-    color: black;
+
+#descricao{
+    background-color: rgb(250, 255, 251);
+    width: 32rem;
+    height: 8rem;
+    padding: 12px;
+
+    box-sizing: border-box;
+    resize: none;
+    border-color: aliceblue;
 }
 
 #layout{
     position: fixed;
+    padding: 1rem;
     left: 0;
     top:0;
-
+    
     width: 4rem;
     height: 20rem;
     
@@ -25,89 +81,40 @@ p{
 
     padding-top:10px;
     gap: 10px;
-    margin:-10px;
+    margin:-5px;
     border-radius: 0;
 }
 
-div{
-    display: block;
-    top: 0px;
-    padding: 20px 20px;
-    margin: 10px;
-
-    background: white;
-    border:none;
-    border-radius: 1rem;
-    width: 35rem;
-    height: 10rem;
-    text-align:justify;
-    color: rgb(196, 196, 196);
-    text-shadow: 0 0 1rem;
-    box-shadow: 0 0 1rem black;
-}
-#escritapst{
-    background-color: transparent;
-    width: 34rem;
-    height: 8rem;
-    
-    
-}
-
-.posts{
-    position:flex;
-    padding: 20px;
-    margin-left: 120px;
-    top: 1px;
-
-    background: white;
-    border:none;
-    border-radius: 1rem;
-    width: 35rem;
-    height: 10rem;
-    text-align:justify;
-    text-align:start;
-    display: flex;
-    flex-direction: column-reverse;
-}
-
-.postados{
-    position:flex;
-    padding: 20px;
-    margin-left: 120px;
-    top: 1px;
-
-    background: white;
-    border:none;
-    border-radius: 1rem;
-    width: 35rem;
-    height: 10rem;
-    text-align:justify;
-    text-align:start;
-    display: block;
-    flex-direction: column-reverse;
-}
 #openpost {
-    position:fixed;
+    position:left;
     padding: 20px;
-    margin-left: 120px;
-    top: 1px;
-
+    top: 1rem;
+    
     background: white;
     border:none;
     border-radius: 1rem;
+    box-shadow: 0 0 1rem rgb(97, 135, 98);
+    
     width: 35rem;
     height: 4rem;
+    
     text-align:justify;
-    text-align:left;
+    text-align:center;
     cursor:pointer;
     color: rgb(196, 196, 196);
     font-size: 3em;
     text-shadow: 0 0 1rem;
-    box-shadow: 0 0 1rem black;
+    
 }
-
-/*#openpost:hover{
-    border: 5px solid rgb(220, 220, 216);
-    font-size: 9rem;
+#postplace{
+    position:fixed;
+    background-color: rgb(35, 11, 11);
+    padding: 0;
+    
+    width: 50%;
+    height: 100%;
     text-align: center;
-}*/
+
+    flex-direction: row;
+    flex-wrap: wrap;
+}
