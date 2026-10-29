@@ -15,11 +15,13 @@ document.getElementById("openpost").addEventListener("click", () =>{ //Evento qu
     botaopost.innerHTML=``;
     let aplic_post = document.createElement("div");
     aplic_post.className = 'posts';
-    aplic_post.innerHTML = `<input type="text" placeholder="Tipo do serviço" id ="tpservico" autocomplete=off required>
+    aplic_post.innerHTML = `<form id="formenvio">
+    <input type="text" placeholder="Tipo do serviço" id ="tpservico" autocomplete=off required>
     R$<input type="text" placeholder="valor do serviço" id ="vlservico" autocomplete=off>
     <button type="button" id="addlcl">Add Local</button>
     <textarea type="text" placeholder="descrição do serviço" id="descricao" required></textarea>
-    <button id="publicar">Publicar</button>
+    <button type="submit" id="publicar">Publicar</button>
+    </form>
     `
     postplace.appendChild(aplic_post);
     
@@ -40,29 +42,27 @@ document.getElementById("openpost").addEventListener("click", () =>{ //Evento qu
         
     })
     
-    aplic_post.querySelector("#publicar").addEventListener("click", () =>{
+    document.getElementById("formenvio").addEventListener("submit", () =>{
         event.preventDefault(); //Para prevenir carregar TEMPORÁRIO PARA TESTE !!! APAGAR DEPOIS!!!
-        const postinarea = document.createElement("div");
-
+        const postinarea = document.createElement("li");
         const elementopst = {
-            valor: document.getElementById("vlservico").value || "Serviço Gratuito",
-            servico: document.getElementById("tpservico").value,
-            local: document.getElementById("itlocal")?.value || "Sem local especificado",
-            descricao: document.getElementById("descricao").value
+            valor: document.getElementById("vlservico").value.trim() || "Serviço Gratuito",
+            servico: document.getElementById("tpservico").value.trim(),
+            local: document.getElementById("itlocal")?.value.trim() || "Sem local especificado",
+            descricao: document.getElementById("descricao").value.trim()
         };
-
-        console.log(elementopst.descricao);
-        console.log(elementopst.valor);
-        console.log(elementopst.servico);
-        console.log(elementopst.local);
-        
+    
         postinarea.className = 'postados';
         postinarea.innerHTML=`<div class="cabdesc>
         <span class="cabdesc">${elementopst.servico}</span>
         <span class="cabdesc">${elementopst.valor}</span>
         <span class="cabdesc">${elementopst.local}</span>
         </div>
-        <span>${elementopst.descricao}</span>`
+        <span>${elementopst.descricao}</span>
+        <div>
+        <button id="contratar">Contratar Serviço</button>
+        </div
+        `
         postarea.appendChild(postinarea);
     })
 })
