@@ -1,6 +1,7 @@
-import express from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import cors from 'cors'
 import { supabase } from './database/supabase'
+import { projetosRoutes } from './routes/projetos.routes'
 
 export const app = express()
 
@@ -23,4 +24,12 @@ app.get('/teste-banco', async (req, res) => {
   }
 
   res.json({ conectado: true, perfis: data })
+})
+
+app.use('/projetos', projetosRoutes)
+
+// Se alguma rota der erro, responde em JSON (o site espera JSON, não uma página de erro)
+app.use((erro: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(erro)
+  res.status(500).json({ erro: erro.message })
 })
