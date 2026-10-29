@@ -4,7 +4,8 @@
   "description": "Repositorio para o site",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/server.ts",
+    "setup": "node -e \"const fs=require('fs');if(!fs.existsSync('.env')){fs.copyFileSync('.env.example','.env');console.log('.env criado')}\" && npm install",
+    "dev":"tsx watch --env-file=.env src/server.ts",
     "start": "tsx --env-file=.env src/server.ts"
   },
   "repository": {
