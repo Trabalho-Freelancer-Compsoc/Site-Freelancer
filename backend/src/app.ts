@@ -2,6 +2,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import cors from 'cors'
 import { supabase } from './database/supabase'
 import { projetosRoutes } from './routes/projetos.routes'
+import { authRoutes } from './routes/auth.routes'
 
 export const app = express()
 
@@ -27,6 +28,7 @@ app.get('/teste-banco', async (req, res) => {
 })
 
 app.use('/projetos', projetosRoutes)
+app.use('/auth', authRoutes)
 
 // Se alguma rota der erro, responde em JSON (o site espera JSON, não uma página de erro)
 app.use((erro: Error, req: Request, res: Response, next: NextFunction) => {

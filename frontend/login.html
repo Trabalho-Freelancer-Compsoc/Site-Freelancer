@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="acesso.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script>
+    <script src="auth.js" defer></script>
+    <script src="sclogin.js" defer></script>
+    <title>Entrar - FreelanTchê</title>
+</head>
+<body>
+    <main class="caixa-acesso">
+        <h1>Entrar</h1>
+        <p class="modo-atual">Modalidade: <strong id="rotulo-modo"></strong> (<a href="acesso.html">trocar</a>)</p>
+
+        <form id="form-login" novalidate>
+            <div class="campo">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" autocomplete="email" required>
+            </div>
+            <div class="campo">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" autocomplete="current-password" required>
+            </div>
+
+            <p id="mensagem" class="mensagem" role="alert" hidden></p>
+
+            <button type="submit" id="botao-entrar" class="botao">Entrar</button>
+        </form>
+
+        <p class="links"><button type="button" id="botao-esqueci" class="link">Esqueci minha senha</button></p>
+        <p class="links">Ainda não tem conta? <a id="link-cadastro" href="cadastro.html">Cadastre-se</a></p>
+        <p class="links"><a href="acesso.html">Voltar à escolha</a></p>
+    </main>
+</body>
+</html>
