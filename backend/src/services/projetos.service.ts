@@ -1,7 +1,5 @@
-import { supabase, supabaseAdmin } from '../database/supabase'
-
-// Temporário: enquanto o site não tem login, todo post fica no nome deste usuário de teste
-const ID_USUARIO_TESTE = '9cd8b44b-30d0-4118-a421-032af498e6a2'
+import { supabase } from '../database/supabase'
+import { supabaseDoUsuario } from './auth.service'
 
 // Colunas que o site recebe
 const COLUNAS = 'id, titulo, descricao, orcamento_min, localizacao, criado_em'
@@ -25,15 +23,15 @@ export async function listarProjetos() {
   return data
 }
 
-// Salva um projeto novo e devolve como ficou no banco
-export async function criarProjeto(novo: NovoProjeto) {
-  // Sem login ainda, só a conexão admin consegue salvar no nome do usuário de teste
-  if (!supabaseAdmin) throw new Error('Falta SUPABASE_SECRET_KEY no .env')
-
-  const { data, error } = await supabaseAdmin
+// Salva um projeto novo no nome de quem está logado e devolve como ficou no banco.
+// Devolve null se a conta ainda não tem linha em perfis.
+export async function criarProjeto(token: string, clienteId: string, novo: NovoProjeto) {
+  // A conexão age como o usuário: a regra cliente_cria_projeto do banco
+  // só aceita se cliente_id for o próprio usuário logado (auth.uid())
+  const { data, error } = await supabaseDoUsuario(token)
     .from('projetos')
     .insert({
-      cliente_id: ID_USUARIO_TESTE,
+      cliente_id: clienteId,
       titulo: novo.titulo,
       descricao: novo.descricao,
       orcamento_min: novo.valor,
@@ -43,6 +41,9 @@ export async function criarProjeto(novo: NovoProjeto) {
     .select(COLUNAS)
     .single()
 
+  // 23503: chave estrangeira. cliente_id aponta para perfis.id,
+  // então este erro quer dizer que a conta não tem perfil (database/11_cria_perfil_no_cadastro.sql)
+  if (error?.code === '23503') return null
   if (error) throw new Error(error.message)
   return data
 }

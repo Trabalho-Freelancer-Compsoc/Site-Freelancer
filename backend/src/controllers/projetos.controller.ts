@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { listarProjetos, criarProjeto } from '../services/projetos.service'
+import type { UsuarioLogado } from '../middlewares/auth.middleware'
 
 // GET /projetos: devolve a lista de projetos para o site
 export async function listar(req: Request, res: Response) {
@@ -7,8 +8,12 @@ export async function listar(req: Request, res: Response) {
   res.json(projetos)
 }
 
-// POST /projetos: recebe o post do site, confere os dados e salva
+// POST /projetos: recebe o post do site, confere os dados e salva no nome de quem está logado.
+// Só chega aqui quem passou pelo exigirLogin, que já colocou o usuário e o token em res.locals.
 export async function criar(req: Request, res: Response) {
+  const usuario = res.locals.usuario as UsuarioLogado
+  const token = res.locals.token as string
+
   const titulo = String(req.body?.servico ?? '').trim()
   const descricao = String(req.body?.descricao ?? '').trim()
   const localizacao = String(req.body?.local ?? '').trim() || null
@@ -29,6 +34,10 @@ export async function criar(req: Request, res: Response) {
     return
   }
 
-  const projeto = await criarProjeto({ titulo, descricao, valor, localizacao })
+  const projeto = await criarProjeto(token, usuario.id, { titulo, descricao, valor, localizacao })
+  if (!projeto) {
+    res.status(409).json({ erro: 'Sua conta ainda não tem perfil. Avise o grupo para criar o perfil no banco' })
+    return
+  }
   res.status(201).json(projeto)
 }

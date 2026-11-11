@@ -92,17 +92,29 @@ document.getElementById("openpost").addEventListener("click", () =>{ //Evento qu
             descricao: document.getElementById("descricao").value.trim()
         };
 
+        //Só quem está logado pode publicar: o servidor usa o token para saber quem é o dono do post
+        const token = await Auth.obterToken();
+        if (!token) {
+            alert("Entre na sua conta para publicar um serviço.");
+            window.location.href = "acesso.html";
+            return;
+        }
+
         try {
             //Envia o post para o servidor, que salva no banco
             const resposta = await fetch(`${API}/projetos`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(elementopst)
             });
 
             if (!resposta.ok) {
                 const falha = await resposta.json();
                 alert(falha.erro);
+                if (resposta.status === 401) window.location.href = "acesso.html"; //sessão expirou: entra de novo
                 return;
             }
         } catch {
