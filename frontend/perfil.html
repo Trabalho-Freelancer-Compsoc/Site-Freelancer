@@ -3,16 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script>
-    <script src="auth.js" defer></script>
-    <script src="scperfil.js" defer></script>
-    <title>Perfil de Usuário</title>
+    <link rel="stylesheet" href="style.css">                      <!-- JÁ EXISTIA -->
+    <link rel="stylesheet" href="acesso.css">                     <!-- NOVO: traz .campo, [hidden], .mensagem -->
+    <link rel="stylesheet" href="perfil.css">                     <!-- NOVO -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script> <!-- JÁ EXISTIA -->
+    <script src="auth.js" defer></script>                         <!-- JÁ EXISTIA -->
+    <script src="scperfil.js" defer></script>                     <!-- JÁ EXISTIA -->
+    <title>Perfil - FreelanTchê</title>                           <!-- só mudei o texto -->
 </head>
-<body data-requer-login>
-    <div id="layout">
-        <button id="areaposts">Área de Posts</button>
-        <button id="chat">Bate Papo</button>
+<body data-requer-login>                                          <!-- JÁ EXISTIA -->
+    <div id="layout">                                             <!-- JÁ EXISTIA -->
+        <button id="areaposts" type="button">Área de Posts</button>
+        <button id="chat" type="button">Bate Papo</button>
     </div>
+
+    <!-- NOVO: tudo daqui para baixo -->
+    <main id="perfil-conteudo">
+        <p id="msg" hidden></p>
+
+        <!-- Dados básicos (tabela perfis) -->
+        <section class="cartao" id="cartao-basico" hidden>
+            <div id="avatar"></div>
+            <h1 id="nome"></h1>
+            <p id="usuario"></p>
+            <p id="local"></p>
+            <p id="bio"></p>
+            <button type="button" id="btn-editar">Editar perfil</button>
+        </section>
+
+        <form class="cartao" id="form-editar" hidden>
+            <div class="campo"><label for="f-foto">Foto de perfil</label>
+                <input id="f-foto" type="file" accept="image/jpeg,image/png,image/webp"></div>
+            <div class="campo"><label for="f-nome">Nome completo</label>
+                <input id="f-nome" maxlength="100" required></div>
+            <div class="campo"><label for="f-usuario">Nome de usuário</label>
+                <input id="f-usuario" maxlength="30"></div>
+            <div class="campo"><label for="f-local">Cidade / local</label>
+                <input id="f-local" maxlength="100"></div>
+            <div class="campo"><label for="f-bio">Sobre você</label>
+                <textarea id="f-bio" maxlength="500" rows="4"></textarea></div>
+            <button type="submit">Salvar</button>
+            <button type="button" id="btn-cancelar">Cancelar</button>
+        </form>
+
+        <!-- Perfil profissional (tabela perfis_freelancer), só no modo "prestar" -->
+        <section class="cartao" id="cartao-freela" hidden>
+            <h2>Perfil profissional</h2>
+
+            <div id="freela-vazio" hidden>
+                <p>Você ainda não tem perfil profissional.</p>
+                <button type="button" id="btn-criar-freela">Criar perfil profissional</button>
+            </div>
+
+            <div id="freela-dados" hidden>
+                <p id="freela-titulo"></p>
+                <p id="freela-valor"></p>
+                <p id="freela-disp"></p>
+                <p id="freela-nivel"></p>
+                <p id="freela-idiomas"></p>
+                <p id="freela-nota"></p>
+                <p><a id="freela-curriculo-link" href="#" target="_blank" hidden>📄 Ver currículo atual</a></p>
+                <button type="button" id="btn-editar-freela">Editar</button>
+            </div>
+
+            <form id="form-freela" hidden>
+                <div class="campo">
+                    <label for="ff-curriculo">Currículo (PDF ou DOCX)</label>
+                    <input id="ff-curriculo" type="file" accept=".pdf,.doc,.docx">
+                </div>
+                <div class="campo"><label for="ff-titulo">Título (ex.: Desenvolvedor web)</label>
+                    <input id="ff-titulo" maxlength="100"></div>
+                <div class="campo"><label for="ff-valor">Valor por hora (R$)</label>
+                    <input id="ff-valor" type="number" min="0" step="0.01"></div>
+                <div class="campo"><label for="ff-disp">Disponibilidade</label>
+                    <input id="ff-disp" maxlength="100"></div>
+                <div class="campo"><label for="ff-nivel">Nível de experiência</label>
+                    <input id="ff-nivel" maxlength="50"></div>
+                <div class="campo"><label for="ff-idiomas">Idiomas (separados por vírgula)</label>
+                    <input id="ff-idiomas" maxlength="100"></div>
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-cancelar-freela">Cancelar</button>
+            </form>
+        </section>
+    </main>
 </body>
 </html>

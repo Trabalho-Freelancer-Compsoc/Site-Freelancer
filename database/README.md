@@ -1,8 +1,8 @@
 # Banco de dados do FreelanTCHÊ
 
-Estrutura lida direto do Supabase em 29/10/2026 e conferida de novo em 11/11/2026.
+Estrutura lida direto do Supabase em 29/10/2026, conferida de novo em 11/11/2026 e com conferências pontuais em 15/11/2026.
 
-O banco tem **30 tabelas** no schema `public`. Em 11/11, só `projetos` (4 linhas) e `perfis` (1 linha, `usuario_teste`) tinham dados. O login (Supabase Auth) tinha 3 contas: o `usuario_teste` e duas criadas pelo cadastro do site, ainda **sem perfil** (veja Problemas).
+O banco tem **30 tabelas** no schema `public` e **2 buckets** de arquivos no Storage (veja "Arquivos (Storage)"). Em 11/11, só `projetos` (4 linhas) e `perfis` (1 linha, `usuario_teste`) tinham dados. Em 15/11, `categorias` tinha as 10 categorias do script `03`, e todas as contas do login (Supabase Auth) tinham perfil, criado pelo script `11`.
 
 ## Arquivos desta pasta
 
@@ -10,12 +10,15 @@ O banco tem **30 tabelas** no schema `public`. Em 11/11, só `projetos` (4 linha
 |---|---|---|
 | `01_schema.sql` | Criação das tabelas | Vazio. Por enquanto, este documento é o registro da estrutura |
 | `02_politicas.sql` | Liga o RLS e cria as regras de acesso | Sim. Copiado do banco; serve para recriar do zero |
-| `03_dados_teste.sql` | Categorias de serviço | Não (tabela `categorias` vazia em 11/11) |
+| `03_dados_teste.sql` | Categorias de serviço | Sim (10 categorias em 15/11) |
 | `04` a `09` | Correções de segurança | Sim (conferido em 11/11) |
 | `10_adiciona_local_projetos.sql` | Coluna `localizacao` em `projetos` | Sim |
-| `11_cria_perfil_no_cadastro.sql` | Cria o perfil quando alguém se cadastra | Não |
+| `11_cria_perfil_no_cadastro.sql` | Cria o perfil quando alguém se cadastra | Sim |
+| `12_cria_bucket_curriculo.sql` | Bucket `curriculo` no Storage (público, PDF ou Word, até 5 MB) e suas regras | Sim |
+| `13_adiciona_curriculo_perfis_freelancer.sql` | Coluna `url_curriculo` em `perfis_freelancer` | Sim. Criada pelo painel; o script é o registro |
+| `14_cria_bucket_avatares.sql` | Bucket `avatares` no Storage (foto de perfil) e suas regras | Sim. Copiado do banco; o script é o registro |
 
-Para recriar o banco do zero, rode na ordem: `01`, `02`, `04` a `11` e por fim `03`.
+Para recriar o banco do zero, rode na ordem: `01`, `02`, `04` a `14` e por fim `03`.
 
 ## As 30 tabelas em 7 grupos
 
@@ -85,6 +88,7 @@ erDiagram
 | `valor_hora` | numeric | |
 | `idiomas` | jsonb | |
 | `avaliacao_media`, `total_ganho`, `trabalhos_concluidos` | numeric / integer | Começam em 0. Só o servidor muda (script 07) |
+| `url_curriculo` | text | Link do currículo no bucket `curriculo`. Adicionada depois (script 13) |
 
 **categorias**: `nome`*, `slug`*, `icone` e `categoria_pai_id` (→ `categorias.id`), que permite subcategorias.
 
@@ -172,6 +176,15 @@ Na prática, estas ações precisam de uma rota no backend que use a chave secre
 - **Avaliar**: cria a `avaliacao` e recalcula `avaliacao_media` do freelancer.
 - **Abrir uma conversa**: cria a `conversa` e os dois `participantes_conversa`.
 
+## Arquivos (Storage)
+
+Os dois buckets são **públicos**: qualquer pessoa com o link abre o arquivo. Para enviar ou trocar, é preciso estar logado, e cada usuário só mexe na pasta com o próprio id. O site salva como `<id do usuário>/<arquivo>`, e arquivo fora dessa pasta é bloqueado. Ninguém apaga arquivo, porque não há regra de DELETE; para trocar, o site envia de novo com o mesmo nome (`upsert`).
+
+| Bucket | Para quê | Aceita | Limite | Script |
+|---|---|---|---|---|
+| `avatares` | Foto de perfil (`perfis.url_avatar`) | JPG, PNG, WebP | 2 MB | `14` |
+| `curriculo` | Currículo do freelancer (`perfis_freelancer.url_curriculo`) | PDF, DOC, DOCX | 5 MB | `12` |
+
 ## Gatilhos
 
 Na leitura de 29/10 não existia nenhum gatilho nas tabelas do projeto nem em `auth.users`. Os únicos eram internos do Supabase (`realtime` e `storage`). O script `11` cria o primeiro, que gera o perfil no cadastro. Continua valendo que:
@@ -195,8 +208,7 @@ Se um dia quiserem mandar o tipo, o gatilho aceita `tipo_usuario: 'freelancer'`.
 
 ## Problemas
 
-1. **Quem se cadastra pelo site fica sem perfil.** Não há gatilho no cadastro nem regra de INSERT em `perfis`. Em 11/11, duas contas criadas pelo site estavam sem perfil, e sem perfil a pessoa não consegue publicar projeto nem mandar proposta (as duas tabelas apontam para `perfis.id`). O script `11` resolve e também cria o perfil de quem já se cadastrou; falta aplicar no Supabase.
-2. **7 tabelas sem nenhuma regra:** `anexos`, `denuncias`, `disputas`, `equipes`, `logs_auditoria`, `marcos` e `membros_equipe`. O RLS está ligado nas 30 tabelas, então essas ficam fechadas para os usuários e só o servidor acessa. Isso é seguro. Se o front-end precisar delas um dia, vai precisar de regras novas ou de rotas no backend.
+1. **7 tabelas sem nenhuma regra:** `anexos`, `denuncias`, `disputas`, `equipes`, `logs_auditoria`, `marcos` e `membros_equipe`. O RLS está ligado nas 30 tabelas, então essas ficam fechadas para os usuários e só o servidor acessa. Isso é seguro. Se o front-end precisar delas um dia, vai precisar de regras novas ou de rotas no backend.
 
 ## Consultas para atualizar este documento
 
@@ -216,4 +228,11 @@ from pg_policies where schemaname = 'public' order by tablename, cmd;
 -- Gatilhos
 select tgrelid::regclass as tabela, tgname as gatilho, pg_get_triggerdef(oid) as definicao
 from pg_trigger where not tgisinternal order by 1;
+
+-- Buckets do Storage
+select id, public, file_size_limit, allowed_mime_types from storage.buckets order by id;
+
+-- Regras dos arquivos (Storage)
+select policyname, cmd, roles, qual, with_check
+from pg_policies where schemaname = 'storage' and tablename = 'objects' order by policyname;
 ```
