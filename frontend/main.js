@@ -7,8 +7,9 @@ const botaopost = document.getElementById("botaopost");
 
 const API = "http://localhost:3000"; //endereço do servidor (backend)
 
-//Monta um post na tela com os dados que vieram do banco
-function mostrarPost(projeto) {
+//Monta um post na tela com os dados que vieram do banco.
+//"eu" é quem está logado (ou null), para saber se o post é da própria pessoa
+function mostrarPost(projeto, eu) {
     const postinarea = document.createElement("li");
     postinarea.className = 'postados';
     postinarea.innerHTML=`<div class="cabdesc">
@@ -19,6 +20,7 @@ function mostrarPost(projeto) {
         <span class="textodesc"></span>
         <div>
         <button type="button" class="contratar">Contratar Serviço</button>
+        <button type="button" class="conversar">Conversar</button>
         </div>
         `
     //textContent em vez de ${}: o texto que veio do banco aparece só como texto e nunca vira código na página
@@ -28,7 +30,50 @@ function mostrarPost(projeto) {
         : Number(projeto.orcamento_min).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     postinarea.querySelector(".local").textContent = projeto.localizacao || "Sem local especificado";
     postinarea.querySelector(".textodesc").textContent = projeto.descricao;
+
+    //"Conversar" abre o bate-papo com quem publicou. No próprio post, o botão não aparece
+    const botaoConversar = postinarea.querySelector(".conversar");
+    if (eu && eu.id === projeto.cliente_id) {
+        botaoConversar.remove();
+    } else {
+        botaoConversar.addEventListener("click", () => abrirConversa(projeto.id, botaoConversar));
+    }
+
     postarea.appendChild(postinarea);
+}
+
+//Pede ao servidor a conversa deste post (cria se ainda não existe) e vai para o bate-papo
+async function abrirConversa(projetoId, botao) {
+    const token = await Auth.obterToken();
+    if (!token) {
+        alert("Entre na sua conta para conversar.");
+        window.location.href = "acesso.html";
+        return;
+    }
+
+    botao.disabled = true;
+    try {
+        const resposta = await fetch(`${API}/conversas`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ projeto_id: projetoId })
+        });
+        const corpo = await resposta.json().catch(() => ({}));
+
+        if (!resposta.ok) {
+            alert(corpo.erro || "Não foi possível abrir a conversa.");
+            if (resposta.status === 401) window.location.href = "acesso.html"; //sessão expirou: entra de novo
+            return;
+        }
+        window.location.href = "chat.html?conversa=" + encodeURIComponent(corpo.id);
+    } catch {
+        alert("Não foi possível falar com o servidor. Veja se ele está ligado.");
+    } finally {
+        botao.disabled = false;
+    }
 }
 
 //Busca os posts salvos no banco (pelo servidor) e mostra na tela
@@ -37,8 +82,9 @@ async function carregarPosts() {
         const resposta = await fetch(`${API}/projetos`);
         if (!resposta.ok) throw new Error();
         const projetos = await resposta.json();
+        const eu = await Auth.usuarioAtual(); //null se ninguém estiver logado
         postarea.innerHTML = ``; //limpa a lista antes de mostrar de novo
-        projetos.forEach(mostrarPost);
+        projetos.forEach((projeto) => mostrarPost(projeto, eu));
     } catch {
         postarea.innerHTML = `<li class="postados">Não foi possível carregar os posts. Veja se o servidor está ligado.</li>`;
     }
@@ -50,6 +96,10 @@ carregarPosts(); //mostra os posts assim que a página abre
 document.getElementById("perfil").addEventListener("click", ()=>{
     window.location.href= "perfil.html";
 })//Adiciona uma percepção de eventos ao id do botão perfil, que ao ser clicado é direcionado para outra página
+
+document.getElementById("chat").addEventListener("click", ()=>{
+    window.location.href= "chat.html";
+})//O botão Bate Papo leva para a lista de conversas
 
 document.getElementById("openpost").addEventListener("click", () =>{ //Evento que fica analisando o botão openpost pelo click
     event.preventDefault();//evita que a página recarregue

@@ -1,0 +1,192 @@
+/* Estilos da página chat.html. Carregar DEPOIS do style.css.
+   Usa as mesmas cores do site: fundo rgb(221,228,221), verde rgb(97,135,98),
+   caixas brancas com cantos de 1rem. */
+
+[hidden] {
+    display: none !important;
+}
+
+.chat {
+    box-sizing: border-box;
+    display: flex;
+    gap: 1rem;
+    height: 100vh;
+    padding: 1rem 1rem 1rem 7rem; /* 7rem: espaço do menu fixo da esquerda */
+}
+
+.chat-lista,
+.chat-conversa {
+    box-sizing: border-box;
+    padding: 1rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 0 1rem rgb(97, 135, 98);
+}
+
+/* Coluna da esquerda: lista de conversas */
+.chat-lista {
+    width: 18rem;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.chat-lista h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+}
+
+#conversas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#conversas button {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    padding: 0.6rem;
+
+    border: none;
+    border-radius: 0.6rem;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+#conversas button:hover {
+    background: rgb(240, 245, 240);
+}
+
+#conversas button.ativa {
+    background: rgb(221, 228, 221);
+}
+
+.post-da-conversa {
+    color: rgb(60, 100, 62);
+}
+
+.previa {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+}
+
+/* Coluna da direita: a conversa aberta */
+.chat-conversa {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+#area-conversa {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.chat-cabecalho {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgb(221, 228, 221);
+}
+
+.chat-cabecalho a {
+    color: rgb(60, 100, 62);
+}
+
+#mensagens {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 1rem 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.balao {
+    align-self: flex-start;
+    max-width: 70%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.8rem;
+    background: rgb(235, 238, 235);
+    white-space: pre-wrap; /* mantém as quebras de linha da mensagem */
+    overflow-wrap: anywhere;
+}
+
+.balao.minha {
+    align-self: flex-end;
+    background: rgb(97, 135, 98);
+    color: white;
+}
+
+.balao small {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+#form-mensagem {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#texto {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid rgb(200, 210, 200);
+    border-radius: 0.6rem;
+    background: white;
+    font: inherit;
+    resize: none;
+}
+
+#botao-enviar {
+    padding: 0 1.2rem;
+    border: none;
+    border-radius: 0.6rem;
+    background: rgb(97, 135, 98);
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+#botao-enviar:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.aviso {
+    color: #555;
+}
+
+.aviso.erro {
+    color: rgb(170, 40, 40);
+}
+
+/* Tela estreita: a lista fica em cima e a conversa embaixo */
+@media (max-width: 700px) {
+    .chat {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .chat-lista {
+        width: auto;
+        max-height: 30vh;
+    }
+
+    .chat-conversa {
+        min-height: 60vh;
+    }
+}
