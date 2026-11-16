@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="chat.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script>
+    <script src="auth.js" defer></script>
+    <script src="scchat.js" defer></script>
+    <title>Bate Papo</title>
+</head>
+<body data-requer-login>
+    <div id="layout">
+        <button id="areaposts" type="button">Área de Posts</button>
+        <button id="perfil" type="button">Perfil</button>
+    </div>
+
+    <main class="chat">
+        <section class="chat-lista">
+            <h2>Conversas</h2>
+            <p id="lista-vazia" class="aviso" hidden>
+                Nenhuma conversa ainda. Na área de posts, clique em "Conversar"
+                para falar com quem publicou.
+            </p>
+            <ul id="conversas"></ul>
+        </section>
+
+        <section class="chat-conversa">
+            <p id="sem-conversa" class="aviso">Escolha uma conversa ao lado.</p>
+
+            <div id="area-conversa" hidden>
+                <header class="chat-cabecalho">
+                    <strong id="nome-outro"></strong>
+                    <small id="titulo-post"></small>
+                </header>
+
+                <ol id="mensagens"></ol>
+
+                <form id="form-mensagem">
+                    <textarea id="texto" rows="2" maxlength="2000"
+                        placeholder="Escreva sua mensagem (Enter envia, Shift+Enter pula linha)" required></textarea>
+                    <button type="submit" id="botao-enviar">Enviar</button>
+                </form>
+            </div>
+
+            <p id="erro-chat" class="aviso erro" hidden></p>
+        </section>
+    </main>
+</body>
+</html>

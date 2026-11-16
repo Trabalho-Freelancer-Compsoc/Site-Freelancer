@@ -1,8 +1,9 @@
 import { supabase } from '../database/supabase'
 import { supabaseDoUsuario } from './auth.service'
 
-// Colunas que o site recebe
-const COLUNAS = 'id, titulo, descricao, orcamento_min, localizacao, criado_em'
+// Colunas que o site recebe. cliente_id é quem publicou: o site usa para não mostrar
+// o botão "Conversar" nos posts da própria pessoa
+const COLUNAS = 'id, cliente_id, titulo, descricao, orcamento_min, localizacao, criado_em'
 
 type NovoProjeto = {
   titulo: string

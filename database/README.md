@@ -17,8 +17,10 @@ O banco tem **30 tabelas** no schema `public` e **2 buckets** de arquivos no Sto
 | `12_cria_bucket_curriculo.sql` | Bucket `curriculo` no Storage (público, PDF ou Word, até 5 MB) e suas regras | Sim |
 | `13_adiciona_curriculo_perfis_freelancer.sql` | Coluna `url_curriculo` em `perfis_freelancer` | Sim. Criada pelo painel; o script é o registro |
 | `14_cria_bucket_avatares.sql` | Bucket `avatares` no Storage (foto de perfil) e suas regras | Sim. Copiado do banco; o script é o registro |
+| `15_abre_conversa.sql` | Função `abrir_conversa`, que começa o bate-papo | Sim (a função existe no banco, conferido em 16/11) |
+| `16_habilidades.sql` | Lista de 44 habilidades | Sim (44 linhas em 16/11). O script é o registro |
 
-Para recriar o banco do zero, rode na ordem: `01`, `02`, `04` a `14` e por fim `03`.
+Para recriar o banco do zero, rode na ordem: `01`, `02`, `04` a `15` e por fim `03` e `16` (os dois só inserem dados).
 
 ## As 30 tabelas em 7 grupos
 
@@ -163,7 +165,7 @@ As regras de linha (RLS) ficam no próprio banco. "Só o servidor" quer dizer qu
 | `propostas` | O freelancer que enviou e o cliente dono do projeto | O freelancer cria (pendente, projeto aberto de outra pessoa). **Aceitar, recusar ou retirar: só o servidor** |
 | `contratos` | O cliente e o freelancer do contrato | Só o servidor |
 | `avaliacoes` | Todos | Só o servidor |
-| `conversas`, `participantes_conversa` | Quem participa | Só o servidor (abrir conversa) |
+| `conversas`, `participantes_conversa` | Quem participa | Abrir: a função `abrir_conversa` (script 15) |
 | `mensagens` | Quem participa | O participante envia em nome próprio. Marcar como lida: só o servidor |
 | `notificacoes`, `carteiras`, `assinaturas` | O dono | Só o servidor |
 | `transacoes` | Quem pagou e quem recebeu | Só o servidor |
@@ -174,7 +176,16 @@ Na prática, estas ações precisam de uma rota no backend que use a chave secre
 
 - **Aceitar uma proposta**: muda a proposta para `aceita`, cria o `contrato` e passa o projeto para `em_andamento`.
 - **Avaliar**: cria a `avaliacao` e recalcula `avaliacao_media` do freelancer.
-- **Abrir uma conversa**: cria a `conversa` e os dois `participantes_conversa`.
+
+## Bate-papo
+
+A conversa é sempre entre duas pessoas e ligada a um post (`projetos`): quem publicou e quem clicou em "Conversar" no post.
+
+1. **Abrir:** o backend chama a função `abrir_conversa(p_projeto_id)` com o token do usuário (script 15). A função confere se a pessoa está logada, se o post existe e se não é dela, e cria a `conversa` e os dois `participantes_conversa` juntos. Se a conversa já existe, devolve a mesma. É uma função, e não uma regra de INSERT, porque com regras soltas o usuário poderia criar uma conversa e colocar nela quem quisesse.
+2. **Ler e enviar:** as regras do script 09 deixam cada participante ler as mensagens da conversa e enviar em nome próprio. Quem não participa não vê nada.
+3. **Mensagens novas:** a página `chat.html` pergunta ao backend a cada 3 segundos. Não usa o Realtime do Supabase e não marca mensagens como lidas.
+
+Rotas do backend, todas com login: `GET /conversas`, `POST /conversas` (`{ projeto_id }`), `GET /conversas/:id/mensagens` e `POST /conversas/:id/mensagens` (`{ conteudo }`).
 
 ## Arquivos (Storage)
 
@@ -190,7 +201,7 @@ Os dois buckets são **públicos**: qualquer pessoa com o link abre o arquivo. P
 Na leitura de 29/10 não existia nenhum gatilho nas tabelas do projeto nem em `auth.users`. Os únicos eram internos do Supabase (`realtime` e `storage`). O script `11` cria o primeiro, que gera o perfil no cadastro. Continua valendo que:
 
 - `atualizado_em` **não** muda sozinho quando uma linha é editada;
-- `avaliacao_media`, `total_ganho` e `trabalhos_concluidos` **não** são recalculados sozinhos.
+- `avaliacao_media`, `total_ganho` e `trabalhos_concluidos` **não** são recalculados sozinhos pelo banco. O servidor recalcula `avaliacao_media` a cada avaliação e `trabalhos_concluidos` quando um serviço é finalizado. `total_ganho` continua parado.
 
 ## Para quem faz o login
 

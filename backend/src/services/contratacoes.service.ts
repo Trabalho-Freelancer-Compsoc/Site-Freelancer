@@ -193,6 +193,7 @@ export async function aceitarSolicitacao(usuarioId: string, propostaId: string) 
     .select('id')
     .single()
   falhou(erroContrato)
+  if (!contrato) throw new Error('Não foi possível criar o contrato')
 
   const { error: e1 } = await admin().from('propostas').update({ status: 'aceita' }).eq('id', proposta.id)
   falhou(e1)
@@ -251,6 +252,7 @@ export async function finalizarServico(usuarioId: string, contratoId: string) {
   falhou(e1)
   const { error: e2 } = await admin().from('projetos').update({ status: 'concluido' }).eq('id', contrato.projeto_id)
   falhou(e2)
+  await recontarConcluidos(contrato.cliente_id)
 }
 
 // Depois de concluído, cada um dos dois avalia o outro uma vez (1 a 5 estrelas)
@@ -283,10 +285,12 @@ export async function avaliarContrato(usuarioId: string, contratoId: string, not
   await recalcularMedia(avaliadoId)
 }
 
-// Recalcula avaliacao_media em perfis_freelancer, só com as notas recebidas como freelancer.
+// Recalcula avaliacao_media em perfis_freelancer, só com as notas recebidas por quem prestou o serviço.
+// Quem prestou é quem publicou o post, e no contrato essa pessoa fica em cliente_id
+// (quem pediu fica em freelancer_id, veja aceitarSolicitacao).
 // Se a pessoa não tem linha em perfis_freelancer, não muda nada.
 async function recalcularMedia(pessoaId: string) {
-  const { data: contratos, error: e1 } = await admin().from('contratos').select('id').eq('freelancer_id', pessoaId)
+  const { data: contratos, error: e1 } = await admin().from('contratos').select('id').eq('cliente_id', pessoaId)
   falhou(e1)
   const ids = (contratos ?? []).map((c) => c.id as string)
   if (ids.length === 0) return
@@ -303,4 +307,21 @@ async function recalcularMedia(pessoaId: string) {
   const media = Math.round((soma / notas.length) * 100) / 100
   const { error: e3 } = await admin().from('perfis_freelancer').update({ avaliacao_media: media }).eq('perfil_id', pessoaId)
   falhou(e3)
+}
+
+// Conta os serviços que a pessoa prestou e já foram finalizados, e grava em trabalhos_concluidos.
+// Quem prestou fica em cliente_id do contrato (veja recalcularMedia).
+// Se a pessoa não tem linha em perfis_freelancer, não muda nada.
+async function recontarConcluidos(pessoaId: string) {
+  const { count, error: e1 } = await admin()
+    .from('contratos')
+    .select('id', { count: 'exact', head: true })
+    .eq('cliente_id', pessoaId)
+    .eq('status', 'concluido')
+  falhou(e1)
+  const { error: e2 } = await admin()
+    .from('perfis_freelancer')
+    .update({ trabalhos_concluidos: count ?? 0 })
+    .eq('perfil_id', pessoaId)
+  falhou(e2)
 }

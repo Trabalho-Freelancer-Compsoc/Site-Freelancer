@@ -4,6 +4,7 @@ import { supabase } from './database/supabase'
 import { projetosRoutes } from './routes/projetos.routes'
 import { authRoutes } from './routes/auth.routes'
 import { contratacoesRoutes } from './routes/contratacoes.routes'
+import { conversasRoutes } from './routes/conversas.routes'
 
 export const app = express()
 
@@ -31,6 +32,7 @@ app.get('/teste-banco', async (req, res) => {
 app.use('/projetos', projetosRoutes)
 app.use('/auth', authRoutes)
 app.use('/contratacoes', contratacoesRoutes)
+app.use('/conversas', conversasRoutes)
 
 // Se alguma rota der erro, responde em JSON (o site espera JSON, não uma página de erro)
 app.use((erro: Error, req: Request, res: Response, next: NextFunction) => {
