@@ -3,25 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">                      <!-- JÁ EXISTIA -->
-    <link rel="stylesheet" href="acesso.css">                     <!-- NOVO: traz .campo, [hidden], .mensagem -->
-    <link rel="stylesheet" href="perfil.css">                     <!-- NOVO -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script> <!-- JÁ EXISTIA -->
-    <script src="auth.js" defer></script>                         <!-- JÁ EXISTIA -->
-    <script src="scperfil.js" defer></script>                     <!-- JÁ EXISTIA -->
-    <title>Perfil - FreelanTchê</title>                           <!-- só mudei o texto -->
+    <link rel="stylesheet" href="style.css">                      
+    <link rel="stylesheet" href="acesso.css">                     
+    <link rel="stylesheet" href="perfil.css">                     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script> 
+    <script src="auth.js" defer></script>                         
+    <script src="scperfil.js" defer></script>                     
+    <title>Perfil - FreelanTchê</title>                           
 </head>
-<body data-requer-login>                                          <!-- JÁ EXISTIA -->
-    <div id="layout">                                             <!-- JÁ EXISTIA -->
+<body data-requer-login>                                          
+    <div id="layout">                                             
         <button id="areaposts" type="button">Área de Posts</button>
         <button id="chat" type="button">Bate Papo</button>
     </div>
 
-    <!-- NOVO: tudo daqui para baixo -->
     <main id="perfil-conteudo">
         <p id="msg" hidden></p>
 
-        <!-- Dados básicos (tabela perfis) -->
         <section class="cartao" id="cartao-basico" hidden>
             <div id="avatar"></div>
             <h1 id="nome"></h1>

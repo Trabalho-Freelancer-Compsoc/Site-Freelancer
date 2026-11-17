@@ -1,7 +1,6 @@
 console.log("scperfil carregou")
 const $ = (id) => document.getElementById(id)
 
-// ---------- JÁ EXISTIA ----------
 $("areaposts").addEventListener("click", () => {
     window.location.href = "index.html"
 })
@@ -9,7 +8,6 @@ $("chat").addEventListener("click", () => {
     window.location.href = "chat.html"
 })
 
-// ---------- NOVO ----------
 // Nunca use select("*") em perfis: o banco bloqueia (script 05)
 const COLUNAS_PERFIL = "id, nome_completo, nome_usuario, bio, localizacao, url_avatar"
 const COLUNAS_FREELA = "titulo, valor_hora, disponibilidade, nivel_experiencia, idiomas, avaliacao_media, trabalhos_concluidos, url_curriculo"
