@@ -210,6 +210,50 @@ span {
     text-align: center;
 }
 
+/* Botão Conversar: igual ao Contratar Serviço, escondido até passar o mouse no cartão */
+.posts .conversar,
+.post-feed .conversar {
+    display: block;
+    max-height: 0;
+    margin: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        max-height var(--ease),
+        opacity var(--ease),
+        margin var(--ease);
+}
+
+.posts:hover .conversar,
+.posts:focus-within .conversar,
+.post-feed:hover .conversar,
+.post-feed:focus-within .conversar {
+    max-height: 4rem;
+    margin-top: 0.75rem;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Botões do post lado a lado: Contratar Serviço e Conversar.
+   Os dois dividem a largura do cartão em partes iguais, para nenhum ficar cortado */
+.acoes {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.acoes .contratar,
+.acoes .conversar {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
+}
+
 /* ==========================================================
    Painel de busca (esquerda)
    ========================================================== */

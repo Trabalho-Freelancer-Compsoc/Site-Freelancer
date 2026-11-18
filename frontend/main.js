@@ -7,6 +7,7 @@ const campobusca = document.getElementById("busca");
 const botaopost = document.getElementById("botaopost");
 
 const API = "http://localhost:3000"; //endereço do servidor (backend)
+let eu = null; //quem está logado (ou null), para não mostrar "Conversar" nos próprios posts
 carregarPesquisa();
 let info = [];
 campobusca.addEventListener('input', ()=>{
@@ -36,7 +37,10 @@ function mostrarPost(projeto, visual) {
         <span class="valor"></span>
         <span class="local"></span>
         <span class="textodesc"></span>
+        <div class="acoes">
         <button type="button" class="contratar">Contratar Serviço</button>
+        <button type="button" class="conversar">Conversar</button>
+        </div>
         </div>
         <div>
         `
@@ -47,7 +51,52 @@ function mostrarPost(projeto, visual) {
         : Number(projeto.orcamento_min).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     postinarea.querySelector(".local").textContent = projeto.localizacao || "Sem local especificado";
     postinarea.querySelector(".textodesc").textContent = projeto.descricao;
+
+    //O contratacao-link.js usa este id para abrir contratar.html?projeto=<id>
+    postinarea.querySelector(".contratar").dataset.projeto = projeto.id;
+
+    //"Conversar" abre o bate-papo com quem publicou. No próprio post, o botão não aparece
+    const botaoConversar = postinarea.querySelector(".conversar");
+    if (eu && eu.id === projeto.cliente_id) {
+        botaoConversar.remove();
+    } else {
+        botaoConversar.addEventListener("click", () => abrirConversa(projeto.id, botaoConversar));
+    }
     return(postinarea);
+}
+
+//Pede ao servidor a conversa deste post (cria se ainda não existe) e vai para o bate-papo
+async function abrirConversa(projetoId, botao) {
+    const token = await Auth.obterToken();
+    if (!token) {
+        alert("Entre na sua conta para conversar.");
+        window.location.href = "acesso.html";
+        return;
+    }
+
+    botao.disabled = true;
+    try {
+        const resposta = await fetch(`${API}/conversas`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ projeto_id: projetoId })
+        });
+        const corpo = await resposta.json().catch(() => ({}));
+
+        if (!resposta.ok) {
+            alert(corpo.erro || "Não foi possível abrir a conversa.");
+            if (resposta.status === 401) window.location.href = "acesso.html"; //sessão expirou: entra de novo
+            return;
+        }
+        window.location.href = "chat.html?conversa=" + encodeURIComponent(corpo.id);
+    } catch {
+        alert("Não foi possível falar com o servidor. Veja se ele está ligado.");
+    } finally {
+        botao.disabled = false;
+    }
 }
 
 
@@ -59,6 +108,7 @@ async function carregarPesquisa() {
         const resposta = await fetch(`${API}/projetos`);
         if (!resposta.ok) throw new Error();
         info = await resposta.json();
+        eu = await Auth.usuarioAtual(); //null se ninguém estiver logado
 
         const colunas = [
             document.querySelector(".post-feed1"),
@@ -83,3 +133,7 @@ async function carregarPesquisa() {
 document.getElementById("perfil").addEventListener("click", ()=>{
     window.location.href= "perfil.html";
 })//Adiciona uma percepção de eventos ao id do botão perfil, que ao ser clicado é direcionado para outra página
+
+document.getElementById("chat").addEventListener("click", ()=>{
+    window.location.href= "chat.html";
+})//O botão Bate Papo leva para a lista de conversas
