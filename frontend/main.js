@@ -1,27 +1,44 @@
 //form's e div's
 const postplace = document.getElementById("postplace");
 const postarea = document.getElementById("postarea");
-
+const areapesq = document.getElementById("resultados");
 //Elementos
+const campobusca = document.getElementById("busca");
 const botaopost = document.getElementById("botaopost");
 
 const API = "http://localhost:3000"; //endereço do servidor (backend)
+carregarPesquisa();
+let info = [];
+campobusca.addEventListener('input', ()=>{
+    areapesq.innerHTML ="";
+    let termobusca = campobusca.value.toLowerCase();
+    if(termobusca !== ""){
 
-//Monta um post na tela com os dados que vieram do banco.
-//"eu" é quem está logado (ou null), para saber se o post é da própria pessoa
-function mostrarPost(projeto, eu) {
+        info.forEach(item =>{
+            console.log(item.titulo);
+            let txtserv = (item.titulo ?? "").toLowerCase();
+            let txtlocal = (item.localizacao ?? "").toLowerCase();
+            if((txtserv.includes(termobusca) || txtlocal.includes(termobusca))){
+                areapesq.appendChild(mostrarPost(item, "post-pesquisa"));
+            }
+        })
+    }
+
+})
+
+function mostrarPost(projeto, visual) {
     const postinarea = document.createElement("li");
-    postinarea.className = 'postados';
-    postinarea.innerHTML=`<div class="cabdesc">
-        <span class="cabdesc servico"></span>
-        <span class="cabdesc valor"></span>
-        <span class="cabdesc local"></span>
-        </div>
+    postinarea.className = `${visual}`;
+    postinarea.innerHTML=`
+        <div class="postslot">
+        <div class="infopost">
+        <span class="servico"></span>
+        <span class="valor"></span>
+        <span class="local"></span>
         <span class="textodesc"></span>
-        <div>
         <button type="button" class="contratar">Contratar Serviço</button>
-        <button type="button" class="conversar">Conversar</button>
         </div>
+        <div>
         `
     //textContent em vez de ${}: o texto que veio do banco aparece só como texto e nunca vira código na página
     postinarea.querySelector(".servico").textContent = projeto.titulo;
@@ -30,149 +47,39 @@ function mostrarPost(projeto, eu) {
         : Number(projeto.orcamento_min).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     postinarea.querySelector(".local").textContent = projeto.localizacao || "Sem local especificado";
     postinarea.querySelector(".textodesc").textContent = projeto.descricao;
-
-    //"Conversar" abre o bate-papo com quem publicou. No próprio post, o botão não aparece
-    const botaoConversar = postinarea.querySelector(".conversar");
-    if (eu && eu.id === projeto.cliente_id) {
-        botaoConversar.remove();
-    } else {
-        botaoConversar.addEventListener("click", () => abrirConversa(projeto.id, botaoConversar));
-    }
-
-    postarea.appendChild(postinarea);
+    return(postinarea);
 }
 
-//Pede ao servidor a conversa deste post (cria se ainda não existe) e vai para o bate-papo
-async function abrirConversa(projetoId, botao) {
-    const token = await Auth.obterToken();
-    if (!token) {
-        alert("Entre na sua conta para conversar.");
-        window.location.href = "acesso.html";
-        return;
-    }
 
-    botao.disabled = true;
-    try {
-        const resposta = await fetch(`${API}/conversas`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ projeto_id: projetoId })
-        });
-        const corpo = await resposta.json().catch(() => ({}));
 
-        if (!resposta.ok) {
-            alert(corpo.erro || "Não foi possível abrir a conversa.");
-            if (resposta.status === 401) window.location.href = "acesso.html"; //sessão expirou: entra de novo
-            return;
-        }
-        window.location.href = "chat.html?conversa=" + encodeURIComponent(corpo.id);
-    } catch {
-        alert("Não foi possível falar com o servidor. Veja se ele está ligado.");
-    } finally {
-        botao.disabled = false;
-    }
-}
+//Busca os posts salvos no banco (pelo servidor)
 
-//Busca os posts salvos no banco (pelo servidor) e mostra na tela
-async function carregarPosts() {
+async function carregarPesquisa() {
     try {
         const resposta = await fetch(`${API}/projetos`);
         if (!resposta.ok) throw new Error();
-        const projetos = await resposta.json();
-        const eu = await Auth.usuarioAtual(); //null se ninguém estiver logado
-        postarea.innerHTML = ``; //limpa a lista antes de mostrar de novo
-        projetos.forEach((projeto) => mostrarPost(projeto, eu));
-    } catch {
+        info = await resposta.json();
+
+        const colunas = [
+            document.querySelector(".post-feed1"),
+            document.querySelector(".post-feed2"),
+            document.querySelector(".post-feed3")
+        ];
+
+        colunas.forEach(coluna => coluna.innerHTML = "");
+
+        const div = Math.ceil(info.length / 3);
+
+        info.forEach((item,index)=>{
+            const coluna = Math.floor(index / div);
+            
+            colunas[coluna].appendChild(mostrarPost(item, "post-feed"));
+        })
+    } catch{
         postarea.innerHTML = `<li class="postados">Não foi possível carregar os posts. Veja se o servidor está ligado.</li>`;
     }
 }
 
-carregarPosts(); //mostra os posts assim que a página abre
-
-
 document.getElementById("perfil").addEventListener("click", ()=>{
     window.location.href= "perfil.html";
 })//Adiciona uma percepção de eventos ao id do botão perfil, que ao ser clicado é direcionado para outra página
-
-document.getElementById("chat").addEventListener("click", ()=>{
-    window.location.href= "chat.html";
-})//O botão Bate Papo leva para a lista de conversas
-
-document.getElementById("openpost").addEventListener("click", () =>{ //Evento que fica analisando o botão openpost pelo click
-    event.preventDefault();//evita que a página recarregue
-    botaopost.innerHTML=``;
-    let aplic_post = document.createElement("div");
-    aplic_post.className = 'posts';
-    aplic_post.innerHTML = `<form id="formenvio">
-    <input type="text" placeholder="Tipo do serviço" id ="tpservico" autocomplete=off required>
-    R$<input type="number" min="0" step="0.01" placeholder="valor do serviço" id ="vlservico" autocomplete=off>
-    <button type="button" id="addlcl">Add Local</button>
-    <textarea type="text" placeholder="descrição do serviço" id="descricao" required></textarea>
-    <button type="submit" id="publicar">Publicar</button>
-    </form>
-    `
-    postplace.appendChild(aplic_post);
-    
-    
-    document.getElementById("addlcl").addEventListener("click", () =>{//Evento que fica analisando o botão de localidade
-        event.preventDefault();
-        let local = document.createElement("div");//cria uma novo elemento, que adiciona os elementos abaixo
-        local.innerHTML=`<input type="text" placeholder="Localidade" id="itlocal">
-        <button type="button" id="cancelarlocal">X</button>
-        `
-        
-        let botao = document.getElementById("addlcl");
-        document.getElementById("addlcl").replaceWith(local); //substitui o elemento de botão por outro
-        
-        document.getElementById("cancelarlocal").addEventListener("click",()=>{//elemento que desfaz a troca
-            local.replaceWith(botao);
-        })
-        
-    })
-    
-    document.getElementById("formenvio").addEventListener("submit", async (e) =>{
-        e.preventDefault(); //evita que a página recarregue: quem salva o post agora é o servidor
-        const elementopst = {
-            valor: document.getElementById("vlservico").value.trim(),
-            servico: document.getElementById("tpservico").value.trim(),
-            local: document.getElementById("itlocal")?.value.trim() || "",
-            descricao: document.getElementById("descricao").value.trim()
-        };
-
-        //Só quem está logado pode publicar: o servidor usa o token para saber quem é o dono do post
-        const token = await Auth.obterToken();
-        if (!token) {
-            alert("Entre na sua conta para publicar um serviço.");
-            window.location.href = "acesso.html";
-            return;
-        }
-
-        try {
-            //Envia o post para o servidor, que salva no banco
-            const resposta = await fetch(`${API}/projetos`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(elementopst)
-            });
-
-            if (!resposta.ok) {
-                const falha = await resposta.json();
-                alert(falha.erro);
-                if (resposta.status === 401) window.location.href = "acesso.html"; //sessão expirou: entra de novo
-                return;
-            }
-        } catch {
-            alert("Não foi possível falar com o servidor. Veja se ele está ligado.");
-            return;
-        }
-
-        e.target.reset(); //limpa os campos
-        carregarPosts(); //busca de novo no banco, já com o post novo
-    })
-})

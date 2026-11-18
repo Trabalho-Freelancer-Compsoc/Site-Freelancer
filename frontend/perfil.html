@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">                      
-    <link rel="stylesheet" href="acesso.css">                     
-    <link rel="stylesheet" href="perfil.css">                     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script> 
-    <script src="auth.js" defer></script>                         
-    <script src="scperfil.js" defer></script>                     
-    <title>Perfil - FreelanTchê</title>                           
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="acesso.css">
+    <link rel="stylesheet" href="perfil.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" defer></script>
+    <script src="auth.js" defer></script>
+    <script src="scperfil.js" defer></script>
+    <title>Perfil - FreelanTchê</title>
 </head>
-<body data-requer-login>                                          
-    <div id="layout">                                             
+<body data-requer-login>
+    <div id="layout">
         <button id="areaposts" type="button">Área de Posts</button>
         <button id="chat" type="button">Bate Papo</button>
     </div>
@@ -20,15 +20,26 @@
     <main id="perfil-conteudo">
         <p id="msg" hidden></p>
 
+        <!-- Dados básicos (tabela perfis) -->
         <section class="cartao" id="cartao-basico" hidden>
             <div id="avatar"></div>
             <h1 id="nome"></h1>
             <p id="usuario"></p>
             <p id="local"></p>
             <p id="bio"></p>
+
+            <!-- Botão de fazer publicação -->
+            <div id="botaopost">
+                <button type="button" id="openpost">+ Fazer publicação</button>
+            </div>
+
             <button type="button" id="btn-editar">Editar perfil</button>
         </section>
 
+        <!-- Formulário de publicação (o JavaScript insere o conteúdo aqui) -->
+        <div id="postplace"></div>
+
+        <!-- Edição dos dados básicos -->
         <form class="cartao" id="form-editar" hidden>
             <div class="campo"><label for="f-foto">Foto de perfil</label>
                 <input id="f-foto" type="file" accept="image/jpeg,image/png,image/webp"></div>
@@ -60,7 +71,7 @@
                 <p id="freela-nivel"></p>
                 <p id="freela-idiomas"></p>
                 <p id="freela-nota"></p>
-                <p><a id="freela-curriculo-link" href="#" target="_blank" hidden>📄 Ver currículo atual</a></p>
+                <p><a id="freela-curriculo-link" href="#" target="_blank" rel="noopener" hidden>📄 Ver currículo atual</a></p>
                 <button type="button" id="btn-editar-freela">Editar</button>
             </div>
 

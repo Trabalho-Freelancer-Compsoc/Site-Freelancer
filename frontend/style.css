@@ -1,141 +1,317 @@
-
-body{
-    background-color: rgb(221, 228, 221);
-    margin: 0;
-    padding: 0;
+/* ==========================================================
+   Variáveis
+   ========================================================== */
+:root {
+    --bg: rgb(221, 228, 221);
+    --card: #ffffff;
+    --accent:#1d1d1d;
+    --text: #1d1d1d;
+    --muted: rgb(196, 196, 196);
+    --radius: 1rem;
+    --gap: 1rem;
+    --ease: 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-input{
+/* ==========================================================
+   Base
+   ========================================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+}
+
+input {
     background-color: transparent;
 }
 
-span{
+span {
     background-color: transparent;
     color: black;
     text-shadow: none;
 }
 
-.posts{
-    box-sizing: border-box;
-    padding: 20px;
-    margin-left: 7rem;
-    top: 1px;
-    
-    background: white;
-    border:none;
-    border-radius: 1rem;
-    
-    width: 35rem;
-    height: auto;
-    
-    text-align:start;
+/* ==========================================================
+   Área dos posts: 3 colunas lado a lado, cada uma com scroll
+   ========================================================== */
+#postarea {
+    position: fixed;
+    top: 0;
+    left: 45%;
+    width: 55%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--gap);
+    padding: var(--gap);
+
+    overflow: hidden;
 }
 
-.postados{
-    display: flex;
-    padding: 20px;
-    margin-left: 1rem;
-    margin-top: 1rem;
+.post-feed1,
+.post-feed2,
+.post-feed3 {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
 
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--gap);
+
+    /* padding lateral generoso: o card cresce no hover sem ser cortado */
+    padding: 0.75rem 0.6rem;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+
+    /* scrollbar discreta */
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
+.post-feed2 {
+    flex-direction: column-reverse;
+}
+
+.post-feed1::-webkit-scrollbar,
+.post-feed2::-webkit-scrollbar,
+.post-feed3::-webkit-scrollbar {
+    width: 6px;
+}
+
+.post-feed1::-webkit-scrollbar-thumb,
+.post-feed2::-webkit-scrollbar-thumb,
+.post-feed3::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 999px;
+}
+
+.post-feed1::-webkit-scrollbar-track,
+.post-feed2::-webkit-scrollbar-track,
+.post-feed3::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ==========================================================
+   Card do post
+   ========================================================== */
+.posts,
+.post-feed {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 20px;
+
+    background: var(--card);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    text-align: start;
+    cursor: pointer;
+    z-index: 1;
+
+    transition:
+        transform var(--ease),
+        box-shadow var(--ease);
+}
+
+/* Reserva de espaço (mantida do original) */
+.postslot {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    height: 11.25rem;
+}
+
+.servico {
+    font-size: 22px;
+}
+
+.infopost {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ==========================================================
+   Elementos escondidos: aparecem só no hover
+   (max-height + opacity permitem animar a abertura)
+   ========================================================== */
+.posts .textodesc,
+.posts .contratar,
+.post-feed .textodesc,
+.post-feed .contratar {
+    display: block;
+    max-height: 0;
+    margin: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        max-height var(--ease),
+        opacity var(--ease),
+        margin var(--ease);
+}
+
+.posts:hover,
+.posts:focus-within,
+.post-feed:hover,
+.post-feed:focus-within {
+    transform: scale(1.04);
+    z-index: 10;
+    box-shadow: 0 0.75rem 2rem rgba(97, 135, 98, 0.45);
+}
+
+.posts:hover .textodesc,
+.posts:focus-within .textodesc,
+.post-feed:hover .textodesc,
+.post-feed:focus-within .textodesc {
+    max-height: 20rem;
+    margin-top: 0.75rem;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.posts:hover .contratar,
+.posts:focus-within .contratar,
+.post-feed:hover .contratar,
+.post-feed:focus-within .contratar {
+    max-height: 4rem;
+    margin-top: 0.75rem;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Botão contratar (classe e id) */
+.posts .contratar,
+.post-feed .contratar,
+#contratar {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+/* ==========================================================
+   Painel de busca (esquerda)
+   ========================================================== */
+#searchpl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    padding: 0;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    background-color: rgb(35, 11, 11);
+    text-align: center;
+}
+
+.post-pesquisa {
+    display: flex;
+    flex-direction: column;
     justify-content: flex-start;
     align-content: flex-start;
-    flex-direction: column;
 
-    background: white;
-    border-radius: 1rem;
+    min-width: 0;
+    min-height: 10rem;
+    margin: 1rem 6rem 0 15rem;
+    padding: 20px;
 
-    min-width: 30rem;
-    min-height: 10rem;   
-
+    background: var(--card);
+    border-radius: var(--radius);
 }
 
-#postarea{
-    display:flex;
-    width: 50%;
-    margin-bottom: auto;
-    flex-direction: column;
-}
-
-#descricao{
-    background-color: rgb(250, 255, 251);
-    width: 32rem;
-    height: 8rem;
-    padding: 12px;
-
-    box-sizing: border-box;
-    resize: none;
-    border-color: aliceblue;
-}
-
-#layout{
+/* ==========================================================
+   Barra lateral
+   ========================================================== */
+#layout {
     position: fixed;
-    padding: 1rem;
+    top: 0;
     left: 0;
-    top:0;
-    
     width: 4rem;
     height: 20rem;
-    
-    display:flex;
-    flex-direction: column;
 
-    padding-top:10px;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    margin:-5px;
+
+    padding: 1rem, 1rem, 1rem;
+    margin: 5px;
     border-radius: 0;
 }
 
-#openpost {
+/* ==========================================================
+   Campos e botões
+   ========================================================== */
+#descricao {
+    width: 32rem;
+    max-width: 100%;
+    height: 8rem;
+    padding: 12px;
+
+    background-color: rgb(250, 255, 251);
+    border-color: aliceblue;
+    resize: none;
+}
+
+#openpost,
+#busca {
+    margin-left: 5rem;
     padding: 20px;
-    top: 1rem;
-    
-    background: white;
-    border:none;
-    border-radius: 1rem;
-    box-shadow: 0 0 1rem rgb(97, 135, 98);
-    
-    width: 35rem;
+
+    background: var(--card);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 0 1rem var(--accent);
+
     height: 4rem;
-    
-    text-align:justify;
-    text-align:center;
-    cursor:pointer;
-    color: rgb(196, 196, 196);
-    font-size: 3em;
+    cursor: pointer;
+
+    transition: transform var(--ease), box-shadow var(--ease);
+}
+
+#openpost:hover,
+#busca:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 1.5rem var(--accent);
+}
+
+#openpost {
+    width: 35rem;
+    color: var(--muted);
+    font-size: 3rem;
     text-shadow: 0 0 1rem;
-    
-}
-#postplace{
-    position:fixed;
-    background-color: rgb(35, 11, 11);
-    padding: 0;
-    right:50%;
-
-    width: 50%;
-    height: 100%;
-    text-align: center;
-
-    flex-direction: row;
-    flex-wrap: wrap;
 }
 
-#postarea{
-    position:fixed;
-    left:50%;
-
-    padding:0;
-
-    display: flex;
-    width: 50%;
-    height: 100%;
+#busca {
+    width: 30rem;
+    color: rgb(35, 11, 11);
 }
 
-#contratar{
-    position: right;
-
-}
-
-#cabdesc{
+#cabdesc {
     display: grid;
     grid-template-columns: repeat(3, auto);
     gap: 1rem;
