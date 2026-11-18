@@ -1,11 +1,11 @@
-// contratacao-link.js: liga o feed (index.html) à nova tela de contratação, SEM mexer no main.js.
-// 1) o botão "Contratar Serviço" de cada post abre contratar.html?projeto=<id> (escondido no modo prestar)
+// contratacao-link.js: liga o feed e a busca (index.html) à tela de contratação, SEM mexer no main.js.
+// 1) o botão "Contratar Serviço" de cada post (feed e resultados da busca) abre contratar.html?projeto=<id>
+//    (escondido no modo prestar)
 // 2) acrescenta o botão "Contratações" no menu lateral
 (function () {
     const API_SERVIDOR = "http://localhost:3000"; //endereço do servidor (backend), o mesmo do main.js
-    const area = document.getElementById("postarea");
-    if (!area) return;
 
+    let projetos = []; //lista de serviços já buscada no servidor
     let espera = null;
 
     //No modo "prestar serviços" não se contrata: esconde o botão "Contratar Serviço" dos posts.
@@ -17,41 +17,60 @@
         document.head.appendChild(estilo);
     }
 
-    //O main.js desenha os posts sem guardar o id. Aqui buscamos a mesma lista (mesma ordem)
-    //e anotamos o id em cada botão, conferindo título e descrição para não errar de post.
-    async function anotarIds() {
-        let projetos;
+    async function buscarProjetos() {
         try {
             const resposta = await fetch(`${API_SERVIDOR}/projetos`);
             if (!resposta.ok) return;
             projetos = await resposta.json();
         } catch {
-            return;
+            /* servidor desligado: segue com a lista que já tinha */
         }
+    }
 
-        const usados = new Set();
-        area.querySelectorAll("li.postados").forEach((post) => {
-            const botao = post.querySelector(".contratar");
-            if (!botao) return;
+    //O main.js desenha os posts sem guardar o id. Aqui descobrimos o id de cada botão comparando
+    //título e descrição do post com a lista do servidor. O feed e os resultados da busca mostram
+    //os mesmos serviços, então cada área é conferida separadamente.
+    //Devolve quantos botões ficaram sem id.
+    function anotarIds() {
+        const usadosPorArea = new Map();
+        let semId = 0;
+
+        document.querySelectorAll(".contratar").forEach((botao) => {
+            const post = botao.closest("li");
+            if (!post) return;
+            const area = post.closest("#resultados") ? "resultados" : "feed";
+            if (!usadosPorArea.has(area)) usadosPorArea.set(area, new Set());
+            const usados = usadosPorArea.get(area);
+
             const titulo = post.querySelector(".servico")?.textContent;
             const descricao = post.querySelector(".textodesc")?.textContent;
             const achado = projetos.find((p) => !usados.has(p.id) && p.titulo === titulo && p.descricao === descricao);
             if (achado) {
                 usados.add(achado.id);
                 botao.dataset.projeto = achado.id;
+            } else {
+                semId++;
             }
         });
+        return semId;
     }
 
-    //Sempre que o main.js redesenha os posts, anota os ids de novo
+    async function atualizar() {
+        if (anotarIds() > 0) {
+            await buscarProjetos(); //tem post que ainda não conhecemos (post novo): busca a lista de novo
+            anotarIds();
+        }
+    }
+
+    //Sempre que a página redesenha posts ou resultados da busca, anota os ids de novo
     new MutationObserver(() => {
         clearTimeout(espera);
-        espera = setTimeout(anotarIds, 150);
-    }).observe(area, { childList: true });
-    anotarIds();
+        espera = setTimeout(atualizar, 150);
+    }).observe(document.body, { childList: true, subtree: true });
+    buscarProjetos().then(atualizar);
 
-    //Um único ouvinte na lista inteira (os posts mudam a toda hora)
-    area.addEventListener("click", (e) => {
+    //Um único ouvinte na página inteira (o feed e a busca mudam a toda hora)
+    document.addEventListener("click", (e) => {
         const botao = e.target.closest(".contratar");
         if (!botao || modoPrestar) return;
         const id = botao.dataset.projeto;
@@ -69,6 +88,7 @@
         botaoMenu.type = "button"; //o menu fica dentro de um <form>: sem isso, enviaria o formulário
         botaoMenu.id = "contratacoes";
         botaoMenu.textContent = "Contratações";
+        botaoMenu.style.cssText = "font-size:0.62rem;padding:2px 0;"; //cabe na barra estreita
         botaoMenu.addEventListener("click", () => {
             window.location.href = "contratacoes.html";
         });
